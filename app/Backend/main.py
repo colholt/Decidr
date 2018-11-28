@@ -21,11 +21,27 @@ cursor = conn.cursor()
 def hello():
     return 'Hello World!'
 
-@app.route('/submit', methods=['GET'])
+
+@app.route('/test', methods=['GET'])
 def submit():
     cursor.execute("INSERT INTO rooms VALUES(null, %s)", "test_room")
     conn.commit()
     return jsonify({"insertID": cursor.lastrowid}), 200
+
+@app.route('/joinRoom')
+def join_room():
+    pass
+
+@app.route('/createRoom', methods=['POST'])
+def create_room():
+    data = request.get_json() # get json data from post request
+    if data == None:
+        return '', 500
+    cursor.execute("INSERT INTO rooms VALUES(null, %s)", data['roomName'])
+    roomID = cursor.lastrowid
+    cursor.execute("INSERT INTO users VALUES(null, %s, %s)", (data['name'], str(roomID)))
+    conn.commit()
+    return '', 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
