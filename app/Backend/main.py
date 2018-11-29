@@ -33,6 +33,24 @@ Body Parameters
         name     # the user's name
         roomID   # room user wishes to join
 Returns
+        good vibes
+'''
+@app.route('/addChoice', methods=['POST'])
+def add_choice():
+    data = request.get_json()
+    if data == None:
+        return '', 500
+    roomID = data['roomID']
+    choice = data['choice']
+    cursor.execute("INSERT INTO choices VALUES(null, %s, %s)", (choice, str(roomID)))
+    conn.commit()
+    return '', 200
+
+'''
+Body Parameters
+        name     # the user's name
+        roomID   # room user wishes to join
+Returns
         roomID
         roomName
         userID
