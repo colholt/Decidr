@@ -1,10 +1,12 @@
-from flask import Flask, jsonify, request, json
+from flask import Flask, jsonify, request, json, Response
 from flask_cors import CORS
 from flaskext.mysql import MySQL
+import redis
 app = Flask(__name__)
 
 mysql = MySQL()
 app = Flask(__name__)
+red = redis.StrictRedis()
 
 CORS(app)
 
@@ -17,6 +19,18 @@ mysql.init_app(app)
 conn = mysql.connect()
 cursor = conn.cursor()
 
+def event_stream(roomID):
+    pubsub = red.pubsub()
+    pubsub.subscribe('users')
+    for new_user in pubsub.listen():
+        print "NEW USER: \n"
+        print new_user
+        for i in new_user:
+            print "thing: " + str(i)
+        if len(str(new_user['data'])) >= 3:
+            if roomID == new_user['data'].split(":")[1]:
+                yield "data: %s\n\n" % new_user
+
 @app.route('/')
 def hello():
     return 'Hello World!'
@@ -27,6 +41,11 @@ def submit():
     cursor.execute("INSERT INTO rooms VALUES(null, %s)", "test_room")
     conn.commit()
     return jsonify({"insertID": cursor.lastrowid}), 200
+
+@app.route('/subscribe')
+def sub_scribe():
+    rid = request.args.get('roomid')
+    return Response(event_stream(rid), mimetype="text/event-stream")
 
 '''
 Body Parameters
@@ -68,6 +87,7 @@ def join_room():
         cursor.execute("INSERT INTO users VALUES(null, %s, %s)", (data['name'], str(room[0][0])))
         userID = cursor.lastrowid
         conn.commit()
+        red.publish('users', u'RID:%s: USER JOINED: %s' % (str(roomID), data['name']))
         return jsonify({"roomID": room[0][0], "roomName": room[0][1], "userID": userID}), 200
     else:
         return 'RoomID not valid', 500
