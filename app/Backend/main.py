@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, json, Response
 from flask_cors import CORS
 from flaskext.mysql import MySQL
 import redis
+import ast
 app = Flask(__name__)
 
 mysql = MySQL()
@@ -22,14 +23,19 @@ cursor = conn.cursor()
 def event_stream(roomID):
     pubsub = red.pubsub()
     pubsub.subscribe('users')
+    pubsub.subscribe('choices')
+    pubsub.subscribe('decisions')
     for new_user in pubsub.listen():
-        print "NEW USER: \n"
-        print new_user
-        for i in new_user:
-            print "thing: " + str(i)
-        if len(str(new_user['data'])) >= 3:
-            if roomID == new_user['data'].split(":")[1]:
+        try:        
+            vals = ast.literal_eval(new_user['data'])
+            print 'vals:'
+            print vals['roomID']
+            print 'rid:',roomID
+            if str(roomID) == str(vals['roomID']):
                 yield "data: %s\n\n" % new_user
+        except (KeyError, ValueError) as e:
+            print 'err:',e
+            yield "data: %s\n\n" % new_user
 
 @app.route('/')
 def hello():
@@ -47,6 +53,19 @@ def sub_scribe():
     rid = request.args.get('roomid')
     return Response(event_stream(rid), mimetype="text/event-stream")
 
+@app.route('/makeDecision', methods=['POST'])
+def make_decision():
+    data = request.get_json()
+    if data == None:
+        return '', 500
+    roomID = data['roomID']
+    userID = data['userID']
+    choiceID = data['choiceID']
+    decision = data['decision']
+    cursor.execute('INSERT INTO decisions VALUES(null, %s, %s, %s, %s)', (choiceID, userID, roomID, decision))
+    red.publish('decisions', u'{"type": "decision", "roomID": %s, "choiceID": %s, "decision": %s}' % (roomID, choiceID, decision))
+    return '', 200
+
 '''
 Body Parameters
         name     # the user's name
@@ -62,7 +81,10 @@ def add_choice():
     roomID = data['roomID']
     choice = data['choice']
     cursor.execute("INSERT INTO choices VALUES(null, %s, %s)", (choice, str(roomID)))
+    choiceID = cursor.lastrowid
     conn.commit()
+    red.publish('choices', u'{"type": "choice", "roomID": "%s", "choice": "%s", "choiceID": %s}' % (str(roomID), choice, choiceID))
+    # red.publish('choices', u'RID:%s: CHOICE ADDED: %s' % (str(roomID), choice))
     return '', 200
 
 '''
@@ -87,7 +109,8 @@ def join_room():
         cursor.execute("INSERT INTO users VALUES(null, %s, %s)", (data['name'], str(room[0][0])))
         userID = cursor.lastrowid
         conn.commit()
-        red.publish('users', u'RID:%s: USER JOINED: %s' % (str(roomID), data['name']))
+        red.publish('users', u'{"type": "", "roomID": "%s", "name": "%s"}' % (str(roomID), data['name']))
+        # red.publish('users', u'RID:%s: USER JOINED: %s' % (str(roomID), data['name']))
         return jsonify({"roomID": room[0][0], "roomName": room[0][1], "userID": userID}), 200
     else:
         return 'RoomID not valid', 500
