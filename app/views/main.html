@@ -1,23 +1,38 @@
 <div class="jumbotron">
-  <h1>'Allo, 'Allo!</h1>
-  <p class="lead">
-    <img src="images/yeoman.png" alt="I'm Yeoman"><br>
-    Always a pleasure scaffolding your apps.
-  </p>
-  <p><a class="btn btn-lg btn-success" ng-href="#/">Splendid!<span class="glyphicon glyphicon-ok"></span></a></p>
+  <div ng-show="!joining && !creating">
+    <h1>Decidr</h1>
+    <p class="lead">
+      Make some decisions
+    </p>
+    <p><button class="btn btn-primary" ng-click="changeView('create')">Create Room</button></p>
+    <p><button class="btn btn-primary" ng-click="changeView('join')">Join Room</button></p>
+  </div>
+  <div class="joinRoom" ng-show="joining">
+    <h1>Join Room</h1>
+    <p class="lead">
+      Enter Name
+    </p>
+    <input type="text">
+    <p class="lead">
+      Enter Room ID
+    </p>
+    <input type="text">
+    </br>
+    <button class="btn btn-primary" ng-click="changeView('home')">Back</button>
+  </div>
+  <div class="createRoom" ng-show="creating">
+    <h1>Create Room</h1>
+    <p class="lead">
+      Enter Your Name
+    </p>
+    <input type="text">
+    <p class="lead">
+      Enter Room Name
+    </p>
+    <input type="text">
+    <button class="btn btn-primary" ng-click="changeView('home')">Back</button>
+  </div>
 </div>
 
 <div class="row marketing">
-  <h4>HTML5 Boilerplate</h4>
-  <p>
-    HTML5 Boilerplate is a professional front-end template for building fast, robust, and adaptable web apps or sites.
-  </p>
-
-  <h4>Angular</h4>
-  <p>
-    AngularJS is a toolset for building the framework most suited to your application development.
-  </p>
-
-  <h4>Karma</h4>
-  <p>Spectacular Test Runner for JavaScript.</p>
 </div>

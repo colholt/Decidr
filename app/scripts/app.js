@@ -13,10 +13,18 @@ angular
     'ngAnimate',
     'ngCookies',
     'ngResource',
+    'ngMaterial',
+    'ngMessages',
     'ngRoute',
     'ngSanitize',
     'ngTouch'
-  ])
+  ]).config(function($mdThemingProvider) {
+    $mdThemingProvider.theme('default')
+    .primaryPalette('blue')
+    .accentPalette('teal')
+    .warnPalette('red')
+    .backgroundPalette('grey');
+  })
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {

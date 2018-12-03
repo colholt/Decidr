@@ -49,6 +49,11 @@ body {
 .jumbotron .btn {
   font-size: 21px;
   padding: 14px 24px;
+  min-width: 250px;
+}
+
+.jumbotron .btn:focus {
+  outline: 0;
 }
 
 /* Supporting marketing content */
