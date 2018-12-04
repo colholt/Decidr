@@ -91,11 +91,17 @@
 
   <div class="endRoom" ng-show="end">
     <h1>{{roomName}}</h1>
-    <div>
-      Users left {{userCount}}
+    <div ng-show="!winner">
+      <div>
+        Users left {{userCount}}
+      </div>
+      <div ng-show="createdRoom">
+        <button class="btn btn-primary" ng-click="roomFinish()" style="padding:5px;">Submit</button>
+      </div>
     </div>
-    <div ng-show="createdRoom">
-      <button class="btn btn-primary" ng-click="roomFinish()" style="padding:5px;">Submit</button>
+    <div ng-show="winner">
+      <h3>It has been decided...</h3>
+      <h3>{{winner}} is the least hated decision!</h3>
     </div>
   </div>
 

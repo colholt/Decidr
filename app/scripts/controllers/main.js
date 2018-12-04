@@ -15,6 +15,7 @@ angular.module('decidrApp')
     $scope.createdRoom = false;
     $scope.choiceArray = {};
     $scope.userCount = 1;
+    $scope.winner = false;
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -49,6 +50,10 @@ angular.module('decidrApp')
         }
         if (fixed_data.type === "final") {
           console.log("ROOM CLOSE\n\n\n");
+          console.log(fixed_data);
+          $scope.$apply(function () {
+            $scope.winner = fixed_data.winner;
+          });
         }
       } catch (e) {
 
