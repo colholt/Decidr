@@ -97,7 +97,12 @@ def final_decision():
         print '\n\n'
     cursor.execute("SELECT * FROM choices WHERE cid=%s", (leastNo.id,))
     answer = cursor.fetchall()
-    return jsonify(answer), 200
+    beef = []
+    columns = ["cid", "text", "rid"]
+    for i in answer:
+        beef.append(dict(zip(columns,i)))
+    red.publish('final', u'{"winner": %s}' % (beef))
+    return jsonify(beef), 200
 
 
 @app.route('/makeDecision', methods=['POST'])
