@@ -66,8 +66,9 @@ def make_decision():
     userID = data['userID']
     choiceID = data['choiceID']
     decision = data['decision']
-    cursor.execute('INSERT INTO decisions VALUES(null, %s, %s, %s, %s)',
-                   (choiceID, userID, roomID, decision))
+    cursor.execute('INSERT INTO decisions VALUES(null, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE decision=%s',
+                   (choiceID, userID, roomID, decision, decision))
+    conn.commit()
     red.publish('decisions', u'{"type": "decision", "roomID": %s, "choiceID": %s, "decision": %s}' % (
         roomID, choiceID, decision))
     return '', 200
@@ -124,14 +125,18 @@ def join_room():
                        (data['name'], str(room[0][0])))
         userID = cursor.lastrowid
         conn.commit()
-        red.publish('users', u'{"type": "", "roomID": "%s", "name": "%s"}' % (
+        red.publish('users', u'{"type": "user", "roomID": "%s", "name": "%s"}' % (
             str(roomID), data['name']))
         # red.publish('users', u'RID:%s: USER JOINED: %s' % (str(roomID), data['name']))
         cursor.execute("SELECT * FROM choices WHERE rid=%s", roomID)
         choices = []
         for i in cursor.fetchall():
             choices.append(list(i))
-        return jsonify({"roomID": room[0][0], "roomName": room[0][1], "userID": userID, "choices": choices}), 200
+        cursor.execute("SELECT * FROM users WHERE rid=%s", roomID)
+        users = []
+        for i in cursor.fetchall():
+                users.append(list(i))
+        return jsonify({"roomID": room[0][0], "roomName": room[0][1], "userID": userID, "choices": choices, "users": users}), 200
     else:
         return 'RoomID not valid', 500
     return '', 200

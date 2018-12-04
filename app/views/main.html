@@ -71,9 +71,9 @@
       </div>
     </div>
     <div ng-repeat="x in choices" style="width: 100%; margin: 0 auto;">
-      <label class="switch-light switch-candy" style="width: 100px; margin: 0 auto;" onclick="">
+      <label class="switch-light switch-candy" style="width: 100px; margin: 0 auto;">
         {{x[1]}}
-        <input type="checkbox">
+        <input type="checkbox" ng-click="editChoice(x[0]); $event.stopPropagation();">
         <span>
           <span>No</span>
           <span>Yes</span>
@@ -81,7 +81,7 @@
         </span>
       </label>
     </div>
-    <button class="btn btn-primary" ng-click="submitRes('home')" style="padding:5px;">Submit</button>
+    <button class="btn btn-primary" ng-click="" style="padding:5px;">Submit</button>
     <button class="btn btn-primary" ng-click="changeView('home')" style="padding:5px;">Back</button>
   </div>
 

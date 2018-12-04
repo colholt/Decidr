@@ -13,6 +13,11 @@ angular.module('decidrApp')
     $scope.userID;
     $scope.idError = false;
     $scope.createdRoom = false;
+    $scope.choiceArray = {};
+    $scope.userCount = 0;
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     $scope.createRoom = function () {
       var data = { "name": $scope.name, "roomName": $scope.roomName };
@@ -33,8 +38,14 @@ angular.module('decidrApp')
           if (fixed_data.type === "choice") {
             $scope.$apply(function () {
               $scope.choices.push([fixed_data.choiceID, fixed_data.choice]);
+              $scope.choiceArray[fixed_data.choiceID] = false;
             });
             console.log($scope.choices);
+          }
+          if (fixed_data.type === "user") {
+            $scope.$apply(function () {
+              $scope.userCount++;
+            });
           }
         };
 
@@ -55,6 +66,10 @@ angular.module('decidrApp')
         url += $scope.roomID;
         $scope.roomName = res.data.roomName;
         $scope.choices = res.data.choices;
+        $scope.choices.forEach(element => {
+          $scope.choiceArray[element[0]] = false;
+        });
+        $scope.userCount = res.data.users.length;
         $scope.createdRoom = false;
         $scope.changeView("view");
         var source = new EventSource(url); //setup event source for SSE
@@ -68,8 +83,20 @@ angular.module('decidrApp')
             if (fixed_data.type === "choice") {
               $scope.$apply(function () {
                 $scope.choices.push([fixed_data.choiceID, fixed_data.choice]);
+                $scope.choiceArray[fixed_data.choiceID] = false;
               });
               console.log($scope.choices);
+            }
+            if (fixed_data.type === "user") {
+              $scope.$apply(function () {
+                $scope.userCount++;
+              });
+            }
+            if (fixed_data.type === "decision") {
+              if (fixed_data.decision === "3") {
+                console.log("user left");
+                $scope.userCount--;
+              }
             }
           } catch (err) {
             //no
@@ -87,17 +114,43 @@ angular.module('decidrApp')
 
 
     $scope.addChoice = function () {
-      var data = {"roomID": $scope.roomID, "choice": $scope.choice};
+      var data = { "roomID": $scope.roomID, "choice": $scope.choice };
       $http.post('http://68.183.140.180:5000/addChoice', data).then(function (res) {
         console.log(res);
         $scope.choice = "";
       }, function (res) {
-        console.log('err',res);
+        console.log('err', res);
       });
     };
 
-    $scope.makeDecision = function () {
-      
+    $scope.postDecision = function (key) {
+      var decInt;
+      if ($scope.choiceArray[key]) { decInt = 1; }
+      else { decInt = 0; }
+      var data = { "roomID": $scope.roomID, "choiceID": key, "userID": $scope.userID, "decision": decInt };
+      $http.post('http://68.183.140.180:5000/makeDecision', data).then(function (res) {
+        console.log(res);
+      }, function (res) {
+        console.log('err', res);
+      });
+    };
+
+    $scope.userFinish = function () {
+      var data = { "roomID": $scope.roomID, "choiceID": 999999, "userID": $scope.userID, "decision": 3 };
+      $http.post('http://68.183.140.180:5000/makeDecision', data).then(function () {
+        // change view
+      });
+    };
+
+    $scope.makeDecision = function (key) {
+      $scope.postDecision(key);
+    };
+
+    $scope.editChoice = function (val) {
+      $scope.choiceArray[val] = !$scope.choiceArray[val];
+      $scope.postDecision(val);
+      console.log("ID clicked:", val);
+      console.log("choice array: ", $scope.choiceArray);
     };
 
 

@@ -39,5 +39,8 @@
   },
   "scripts": {
     "test": "karma start test\\karma.conf.js"
+  },
+  "dependencies": {
+    "async": "^2.6.1"
   }
 }
