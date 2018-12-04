@@ -116,7 +116,7 @@ def join_room():
     if data == None:
         return '', 500
     roomID = data['roomID']
-    cursor.execute("SELECT * FROM rooms WHERE id=%s", roomID)
+    cursor.execute("SELECT * FROM rooms WHERE id=%s", (roomID,))
     room = cursor.fetchall()
     print 'room: ', room
     if len(room) != 0:
@@ -152,7 +152,7 @@ def create_room():
     data = request.get_json()  # get json data from post request
     if data == None:
         return '', 500
-    cursor.execute("INSERT INTO rooms VALUES(null, %s)", data['roomName'])
+    cursor.execute("INSERT INTO rooms VALUES(null, %s)", (data['roomName'],))
     roomID = cursor.lastrowid
     cursor.execute("INSERT INTO users VALUES(null, %s, %s)",
                    (data['name'], str(roomID)))
