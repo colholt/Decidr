@@ -1,5 +1,5 @@
 <div class="jumbotron">
-  <div ng-show="!joining && !creating">
+  <div ng-show="!joining && !creating && !view">
     <h1>Decidr</h1>
     <p class="lead">
       Make some decisions
@@ -7,19 +7,35 @@
     <p><button class="btn btn-primary" ng-click="changeView('create')">Create Room</button></p>
     <p><button class="btn btn-primary" ng-click="changeView('join')">Join Room</button></p>
   </div>
+
+  <!-- Join Room View -->
+
   <div class="joinRoom" ng-show="joining">
     <h1>Join Room</h1>
-    <p class="lead">
-      Enter Name
-    </p>
-    <input type="text">
-    <p class="lead">
-      Enter Room ID
-    </p>
-    <input type="text">
+    <div class="alert alert-danger" role="alert" ng-show="idError">
+      Room does not exist!
+    </div>
+    <div class="input-group mb-3 cenput">
+      <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1"
+        ng-model="name">
+    </div>
+    <div class="input-group mb-3 cenput">
+      <input type="text" class="form-control" placeholder="Room ID" aria-label="Room ID" aria-describedby="basic-addon1"
+        ng-model="rid">
+    </div>
     </br>
-    <button class="btn btn-primary" ng-click="changeView('home')">Back</button>
+    <div class="cenput">
+      <button class="btn btn-primary" style="padding:5px;" ng-click="joinRoom()">Join</button>
+    </div>
+    <div class="cenput">
+      <button class="btn btn-primary" style="padding:5px;" ng-click="changeView('home')">Back</button>
+    </div>
   </div>
+
+  <!-- Join Room View End -->
+
+  <!-- Create Room View -->
+
   <div class="createRoom" ng-show="creating">
     <h1>Create Room</h1>
     <p class="lead">
@@ -32,7 +48,29 @@
     <input type="text">
     <button class="btn btn-primary" ng-click="changeView('home')">Back</button>
   </div>
-</div>
 
+  <!-- Create Room View End -->
+
+  <!-- Room View -->
+
+  <div class="viewRoom" ng-show="view">
+    <h1>{{roomName}}</h1>
+    <div ng-repeat="x in choices" style="width: 100%; margin: 0 auto;">
+      <label class="switch-light switch-candy" style="width: 100px; margin: 0 auto;" onclick="">
+        {{x[1]}}
+        <input type="checkbox">
+        <span>
+          <span>No</span>
+          <span>Yes</span>
+          <a></a>
+        </span>
+      </label>
+    </div>
+    <button class="btn btn-primary" ng-click="changeView('home')">Back</button>
+  </div>
+
+  <!-- Room View End -->
+
+</div>
 <div class="row marketing">
 </div>
