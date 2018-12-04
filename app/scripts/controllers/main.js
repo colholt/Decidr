@@ -22,26 +22,30 @@ angular.module('decidrApp')
     var updateMsg = function (event) {
       var data = event.data.split('\n');
       console.log(data);
-      var fixed_data = JSON.parse(data[0].split("'data': ")[1].split("'}")[0].slice(1));
-      if (fixed_data.type === "choice") {
-        $scope.$apply(function () {
-          $scope.choices.push([fixed_data.choiceID, fixed_data.choice]);
-          $scope.choiceArray[fixed_data.choiceID] = false;
-        });
-        console.log($scope.choices);
-      }
-      if (fixed_data.type === "user") {
-        $scope.$apply(function () {
-          $scope.userCount++;
-        });
-      }
-      if (fixed_data.type === "decision") {
-        if (fixed_data.decision === 3) {
-          console.log("user left");
+      try {
+        var fixed_data = JSON.parse(data[0].split("'data': ")[1].split("'}")[0].slice(1));
+        if (fixed_data.type === "choice") {
           $scope.$apply(function () {
-            $scope.userCount--;
+            $scope.choices.push([fixed_data.choiceID, fixed_data.choice]);
+            $scope.choiceArray[fixed_data.choiceID] = false;
+          });
+          console.log($scope.choices);
+        }
+        if (fixed_data.type === "user") {
+          $scope.$apply(function () {
+            $scope.userCount++;
           });
         }
+        if (fixed_data.type === "decision") {
+          if (fixed_data.decision === 3) {
+            console.log("user left");
+            $scope.$apply(function () {
+              $scope.userCount--;
+            });
+          }
+        }
+      } catch (e) {
+
       }
     };
 

@@ -21,11 +21,20 @@ conn = mysql.connect()
 cursor = conn.cursor()
 
 
+class Choice:
+
+    def __init__(self, id, yes, no):
+        self.yes = yes
+        self.no = no
+        self.id = id
+
+
 def event_stream(roomID):
     pubsub = red.pubsub()
     pubsub.subscribe('users')
     pubsub.subscribe('choices')
     pubsub.subscribe('decisions')
+    pubsub.subscribe('final')
     for new_user in pubsub.listen():
         try:
             vals = ast.literal_eval(new_user['data'])
@@ -55,6 +64,40 @@ def submit():
 def sub_scribe():
     rid = request.args.get('roomid')
     return Response(event_stream(rid), mimetype="text/event-stream")
+
+
+@app.route('/finalDecision', methods=['POST'])
+def final_decision():
+    data = request.get_json()
+    userCount = cursor.execute(
+        'SELECT * FROM users WHERE rid=%s', (data['roomID'],))
+    print 'userCount',userCount
+    print 'users:', cursor.fetchall()
+    users = cursor.fetchall()
+    choiceCount = cursor.execute(
+        'SELECT * FROM choices WHERE rid=%s', (data['roomID'],))
+    choices = cursor.fetchall()
+    choiceList = []
+    for i in choices:
+        print 'choice', i
+        yes = cursor.execute("SELECT * FROM decisions WHERE rid=%s AND cid=%s", (data['roomID'], i[0]))
+        choiceList.append(Choice(i[0], yes, userCount-yes))
+    paperweightChoice = Choice(0, 0, 2147)
+    leastNo = paperweightChoice
+    maxNo = paperweightChoice
+    multiple = False
+    for i in choiceList:
+        if i.yes > maxNo.yes:
+            maxNo = i
+        if i.no < leastNo.no:
+            leastNo = i
+        print i.id
+        print i.yes
+        print i.no
+        print '\n\n'
+    cursor.execute("SELECT * FROM choices WHERE cid=%s", (leastNo.id,))
+    answer = cursor.fetchall()
+    return jsonify(answer), 200
 
 
 @app.route('/makeDecision', methods=['POST'])
@@ -135,7 +178,7 @@ def join_room():
         cursor.execute("SELECT * FROM users WHERE rid=%s", roomID)
         users = []
         for i in cursor.fetchall():
-                users.append(list(i))
+            users.append(list(i))
         return jsonify({"roomID": room[0][0], "roomName": room[0][1], "userID": userID, "choices": choices, "users": users}), 200
     else:
         return 'RoomID not valid', 500
