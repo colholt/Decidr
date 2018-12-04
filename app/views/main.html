@@ -1,5 +1,5 @@
 <div class="jumbotron">
-  <div ng-show="!joining && !creating && !view">
+  <div ng-show="!joining && !creating && !view && !end">
     <h1>Decidr</h1>
     <p class="lead">
       Make some decisions
@@ -81,11 +81,22 @@
         </span>
       </label>
     </div>
-    <button class="btn btn-primary" ng-click="" style="padding:5px;">Submit</button>
+    <button class="btn btn-primary" ng-click="userFinish()" style="padding:5px;">Submit</button>
     <button class="btn btn-primary" ng-click="changeView('home')" style="padding:5px;">Back</button>
   </div>
 
   <!-- Room View End -->
+
+  <!-- End View -->
+
+  <div class="endRoom" ng-show="end">
+      <h1>{{roomName}}</h1>
+      <div>
+        Users left {{userCount}}
+      </div>    
+  </div>
+
+  <!-- End View End -->
 
 </div>
 <div class="row marketing">

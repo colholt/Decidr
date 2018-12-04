@@ -14,10 +14,36 @@ angular.module('decidrApp')
     $scope.idError = false;
     $scope.createdRoom = false;
     $scope.choiceArray = {};
-    $scope.userCount = 0;
+    $scope.userCount = 1;
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     }
+
+    var updateMsg = function (event) {
+      var data = event.data.split('\n');
+      console.log(data);
+      var fixed_data = JSON.parse(data[0].split("'data': ")[1].split("'}")[0].slice(1));
+      if (fixed_data.type === "choice") {
+        $scope.$apply(function () {
+          $scope.choices.push([fixed_data.choiceID, fixed_data.choice]);
+          $scope.choiceArray[fixed_data.choiceID] = false;
+        });
+        console.log($scope.choices);
+      }
+      if (fixed_data.type === "user") {
+        $scope.$apply(function () {
+          $scope.userCount++;
+        });
+      }
+      if (fixed_data.type === "decision") {
+        if (fixed_data.decision === 3) {
+          console.log("user left");
+          $scope.$apply(function () {
+            $scope.userCount--;
+          });
+        }
+      }
+    };
 
     $scope.createRoom = function () {
       var data = { "name": $scope.name, "roomName": $scope.roomName };
@@ -32,21 +58,7 @@ angular.module('decidrApp')
         $scope.createdRoom = true;
         // process event from server
         source.onmessage = function (event) {
-          var data = event.data.split('\n');
-          console.log(data);
-          var fixed_data = JSON.parse(data[0].split("'data': ")[1].split("'}")[0].slice(1));
-          if (fixed_data.type === "choice") {
-            $scope.$apply(function () {
-              $scope.choices.push([fixed_data.choiceID, fixed_data.choice]);
-              $scope.choiceArray[fixed_data.choiceID] = false;
-            });
-            console.log($scope.choices);
-          }
-          if (fixed_data.type === "user") {
-            $scope.$apply(function () {
-              $scope.userCount++;
-            });
-          }
+          updateMsg(event);
         };
 
         $scope.changeView("view");
@@ -54,6 +66,8 @@ angular.module('decidrApp')
         console.log("failure", res);
       });
     };
+
+
 
     $scope.joinRoom = function () {
       var data = { "name": $scope.name, "roomID": $scope.rid };
@@ -75,32 +89,7 @@ angular.module('decidrApp')
         var source = new EventSource(url); //setup event source for SSE
 
         source.onmessage = function (event) {
-          // process event from server
-          var data = event.data.split('\n');
-          console.log(data);
-          try {
-            var fixed_data = JSON.parse(data[0].split("'data': ")[1].split("'}")[0].slice(1));
-            if (fixed_data.type === "choice") {
-              $scope.$apply(function () {
-                $scope.choices.push([fixed_data.choiceID, fixed_data.choice]);
-                $scope.choiceArray[fixed_data.choiceID] = false;
-              });
-              console.log($scope.choices);
-            }
-            if (fixed_data.type === "user") {
-              $scope.$apply(function () {
-                $scope.userCount++;
-              });
-            }
-            if (fixed_data.type === "decision") {
-              if (fixed_data.decision === "3") {
-                console.log("user left");
-                $scope.userCount--;
-              }
-            }
-          } catch (err) {
-            //no
-          }
+          updateMsg(event);
         };
       }, function (res) {
         // handle room not joined
@@ -136,9 +125,10 @@ angular.module('decidrApp')
     };
 
     $scope.userFinish = function () {
-      var data = { "roomID": $scope.roomID, "choiceID": 999999, "userID": $scope.userID, "decision": 3 };
+      var data = { "roomID": $scope.roomID, "choiceID": 9999, "userID": $scope.userID, "decision": 3 };
       $http.post('http://68.183.140.180:5000/makeDecision', data).then(function () {
         // change view
+        $scope.changeView("end");
       });
     };
 
@@ -158,21 +148,31 @@ angular.module('decidrApp')
     $scope.changeView = function (name) {
       if (name === "join") {
         $scope.joining = true;
+        $scope.end = false;
         $scope.creating = false;
       }
       if (name === "create") {
         $scope.joining = false;
+        $scope.end = false;
         $scope.creating = true;
       }
       if (name === "view") {
         $scope.joining = false;
         $scope.creating = false;
+        $scope.end = false;
         $scope.view = true;
+      }
+      if (name === "end") {
+        $scope.joining = false;
+        $scope.creating = false;
+        $scope.view = false;
+        $scope.end = true;
       }
       if (name === "home") {
         $scope.joining = false;
         $scope.creating = false;
         $scope.view = false;
+        $scope.end = false;
       }
     };
   });
