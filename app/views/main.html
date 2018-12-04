@@ -61,6 +61,15 @@
 
   <div class="viewRoom" ng-show="view">
     <h1>{{roomName}}</h1>
+    <h3 ng-show="createdRoom">Tell friends room ID is {{roomID}}</h3>
+    <button class="btn btn-primary" style="min-width: 50px; padding: 5px;" data-toggle="collapse" data-target="#addChoice">+</button>
+    <div id="addChoice" class="collapse">
+      <div class="input-group mb-3 cenput">
+        <input type="text" class="form-control" placeholder="Choice" aria-label="Choice" aria-describedby="basic-addon1"
+          ng-model="choice">
+        <button class="btn btn-primary" style="padding: 0px;" ng-click="addChoice()">Click to Add</button>
+      </div>
+    </div>
     <div ng-repeat="x in choices" style="width: 100%; margin: 0 auto;">
       <label class="switch-light switch-candy" style="width: 100px; margin: 0 auto;" onclick="">
         {{x[1]}}
