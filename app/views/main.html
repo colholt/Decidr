@@ -38,15 +38,21 @@
 
   <div class="createRoom" ng-show="creating">
     <h1>Create Room</h1>
-    <p class="lead">
-      Enter Your Name
-    </p>
-    <input type="text">
-    <p class="lead">
-      Enter Room Name
-    </p>
-    <input type="text">
-    <button class="btn btn-primary" ng-click="changeView('home')">Back</button>
+    <div class="input-group mb-3 cenput">
+      <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1"
+        ng-model="name">
+    </div>
+    <div class="input-group mb-3 cenput">
+      <input type="text" class="form-control" placeholder="Room Name" aria-label="Room Name" aria-describedby="basic-addon1"
+        ng-model="roomName">
+    </div>
+    </br>
+    <div class="cenput">
+      <button class="btn btn-primary" style="padding:5px;" ng-click="createRoom()">Create</button>
+    </div>
+    <div class="cenput">
+      <button class="btn btn-primary" style="padding:5px;" ng-click="changeView('home')">Back</button>
+    </div>
   </div>
 
   <!-- Create Room View End -->
