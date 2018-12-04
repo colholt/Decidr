@@ -90,10 +90,13 @@
   <!-- End View -->
 
   <div class="endRoom" ng-show="end">
-      <h1>{{roomName}}</h1>
-      <div>
-        Users left {{userCount}}
-      </div>    
+    <h1>{{roomName}}</h1>
+    <div>
+      Users left {{userCount}}
+    </div>
+    <div ng-show="createdRoom">
+      <button class="btn btn-primary" ng-click="roomFinish()" style="padding:5px;">Submit</button>
+    </div>
   </div>
 
   <!-- End View End -->

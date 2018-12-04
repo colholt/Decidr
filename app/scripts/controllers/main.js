@@ -22,8 +22,11 @@ angular.module('decidrApp')
     var updateMsg = function (event) {
       var data = event.data.split('\n');
       console.log(data);
+      console.log("THING");
       try {
         var fixed_data = JSON.parse(data[0].split("'data': ")[1].split("'}")[0].slice(1));
+        console.log(fixed_data);
+
         if (fixed_data.type === "choice") {
           $scope.$apply(function () {
             $scope.choices.push([fixed_data.choiceID, fixed_data.choice]);
@@ -43,6 +46,9 @@ angular.module('decidrApp')
               $scope.userCount--;
             });
           }
+        }
+        if (fixed_data.type === "final") {
+          console.log("ROOM CLOSE\n\n\n");
         }
       } catch (e) {
 
@@ -71,6 +77,13 @@ angular.module('decidrApp')
       });
     };
 
+
+    $scope.roomFinish = function () {
+      var data = { "roomID": $scope.roomID };
+      $http.post('http://68.183.140.180:5000/finalDecision', data).then(function () {
+
+      });
+    };
 
 
     $scope.joinRoom = function () {

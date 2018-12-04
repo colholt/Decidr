@@ -39,6 +39,7 @@ def event_stream(roomID):
         try:
             vals = ast.literal_eval(new_user['data'])
             print 'vals:'
+            print vals
             print vals['roomID']
             print 'rid:', roomID
             if str(roomID) == str(vals['roomID']):
@@ -101,7 +102,8 @@ def final_decision():
     columns = ["cid", "text", "rid"]
     for i in answer:
         beef.append(dict(zip(columns,i)))
-    red.publish('final', u'{"winner": %s}' % (beef))
+    print beef
+    red.publish('final', u'{"type": "final", "roomID": %s, "winner": "%s"}' % (data['roomID'], beef[0]['text']))
     return jsonify(beef), 200
 
 
